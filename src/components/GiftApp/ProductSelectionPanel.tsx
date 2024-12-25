@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchAllProducts } from '@/services/productsApi';
 import { Input } from "@/components/ui/input";
 import { Product } from '@/types/product';
-import { Search } from 'lucide-react';
+import { Search, DragHandleDots2Icon } from 'lucide-react';
 
 interface ProductSelectionPanelProps {
   onItemDrop: (item: Product) => void;
@@ -13,7 +13,7 @@ interface ProductSelectionPanelProps {
 const ProductSelectionPanel = ({ onItemDrop }: ProductSelectionPanelProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('tous');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+  const [draggedItem, setDraggedItem] = useState<Product | null>(null);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
@@ -25,17 +25,21 @@ const ProductSelectionPanel = ({ onItemDrop }: ProductSelectionPanelProps) => {
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'tous' || product.category_product.toLowerCase() === selectedCategory;
-    const matchesPrice = product.price >= priceRange.min && product.price <= priceRange.max;
-    return matchesSearch && matchesCategory && matchesPrice;
+    return matchesSearch && matchesCategory;
   });
 
-  const handleItemClick = (item: Product) => {
-    onItemDrop(item);
+  const handleDragStart = (e: React.DragEvent, item: Product) => {
+    e.dataTransfer.setData('product', JSON.stringify(item));
+    setDraggedItem(item);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4">
-      <div className="space-y-4">
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="space-y-6">
         <div className="relative">
           <Search className="absolute left-3 top-3 text-gray-400" size={20} />
           <Input
@@ -47,14 +51,14 @@ const ProductSelectionPanel = ({ onItemDrop }: ProductSelectionPanelProps) => {
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
                 selectedCategory === category
-                  ? 'bg-[#700100] text-white'
+                  ? 'bg-[#700100] text-white shadow-md transform scale-105'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -67,20 +71,27 @@ const ProductSelectionPanel = ({ onItemDrop }: ProductSelectionPanelProps) => {
           {filteredProducts.map((product) => (
             <motion.div
               key={product.id}
-              onClick={() => handleItemClick(product)}
+              draggable
+              onDragStart={(e) => handleDragStart(e, product)}
+              onDragEnd={handleDragEnd}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-white rounded-lg shadow-sm p-2 cursor-pointer"
+              className={`bg-white rounded-lg shadow-sm p-4 cursor-grab active:cursor-grabbing border border-gray-100 hover:shadow-md transition-all ${
+                draggedItem?.id === product.id ? 'opacity-50' : ''
+              }`}
             >
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-32 object-contain mb-2"
-              />
-              <h3 className="text-sm font-medium text-gray-900 truncate">
-                {product.name}
-              </h3>
-              <p className="text-sm text-gray-500">{product.price} TND</p>
+              <div className="relative">
+                <DragHandleDots2Icon className="absolute top-0 right-0 text-gray-400" size={16} />
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-32 object-contain mb-2"
+                />
+                <h3 className="text-sm font-medium text-gray-900 truncate">
+                  {product.name}
+                </h3>
+                <p className="text-sm text-[#700100] font-medium">{product.price} TND</p>
+              </div>
             </motion.div>
           ))}
         </div>
