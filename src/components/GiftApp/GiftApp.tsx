@@ -37,8 +37,8 @@ const GiftApp = () => {
     setSelectedItems((prev) => [...prev, item]);
     playTickSound();
     toast({
-      title: "Item Added! 🎁",
-      description: "Don't forget you can add a personal message to your gift!",
+      title: "Article Ajouté! 🎁",
+      description: "N'oubliez pas que vous pouvez ajouter un message personnalisé à votre cadeau!",
       style: {
         backgroundColor: '#700100',
         color: 'white',
@@ -50,7 +50,6 @@ const GiftApp = () => {
   const handleConfirmPack = async () => {
     setIsLoading(true);
     
-    // Add items to cart one by one with animation delay
     for (const item of selectedItems) {
       await new Promise(resolve => setTimeout(resolve, 500));
       addToCart({
@@ -61,8 +60,8 @@ const GiftApp = () => {
     }
 
     toast({
-      title: "Pack Added to Cart! 🎉",
-      description: "Would you like to proceed to checkout?",
+      title: "Pack Ajouté au Panier! 🎉",
+      description: "Souhaitez-vous procéder au paiement?",
       action: (
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -70,7 +69,7 @@ const GiftApp = () => {
           className="bg-white text-[#700100] px-4 py-2 rounded-md font-medium"
           onClick={() => navigate('/cart')}
         >
-          Go to Cart
+          Voir le Panier
         </motion.button>
       ),
       style: {
@@ -92,27 +91,41 @@ const GiftApp = () => {
           className="flex flex-col items-center"
         >
           <div className="w-16 h-16 border-4 border-[#700100] border-t-transparent rounded-full animate-spin" />
-          <p className="mt-4 text-[#700100] font-medium">Creating your gift pack...</p>
+          <p className="mt-4 text-[#700100] font-medium">Création de votre pack cadeau...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F1F0FB] p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F1F0FB] to-[#E5DEFF] p-4 md:p-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Product Selection Panel */}
-        <div className="lg:col-span-4">
+        <motion.div 
+          className="lg:col-span-4"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <ProductSelectionPanel onItemDrop={handleItemDrop} />
-        </div>
+        </motion.div>
 
-        {/* 3D Gift Basket */}
-        <div className="lg:col-span-4">
-          <GiftBasket3D items={selectedItems} />
-        </div>
+        <motion.div 
+          className="lg:col-span-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
+            <GiftBasket3D items={selectedItems} />
+          </div>
+        </motion.div>
 
-        {/* Pack Summary */}
-        <div className="lg:col-span-4">
+        <motion.div 
+          className="lg:col-span-4"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           <PackSummary
             items={selectedItems}
             note={packNote}
@@ -124,7 +137,7 @@ const GiftApp = () => {
             onConfirm={handleConfirmPack}
             disabled={selectedItems.length === 0}
           />
-        </div>
+        </motion.div>
       </div>
     </div>
   );
