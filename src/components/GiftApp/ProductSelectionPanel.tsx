@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchAllProducts } from '@/services/productsApi';
 import { Input } from "@/components/ui/input";
 import { Product } from '@/types/product';
-import { Search, DragHandleDots2Icon } from 'lucide-react';
+import { Search, GripVertical } from 'lucide-react';
 
 interface ProductSelectionPanelProps {
   onItemDrop: (item: Product) => void;
@@ -28,7 +28,7 @@ const ProductSelectionPanel = ({ onItemDrop }: ProductSelectionPanelProps) => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleDragStart = (e: React.DragEvent, item: Product) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Product) => {
     e.dataTransfer.setData('product', JSON.stringify(item));
     setDraggedItem(item);
   };
@@ -81,7 +81,7 @@ const ProductSelectionPanel = ({ onItemDrop }: ProductSelectionPanelProps) => {
               }`}
             >
               <div className="relative">
-                <DragHandleDots2Icon className="absolute top-0 right-0 text-gray-400" size={16} />
+                <GripVertical className="absolute top-0 right-0 text-gray-400" size={16} />
                 <img
                   src={product.image}
                   alt={product.name}
